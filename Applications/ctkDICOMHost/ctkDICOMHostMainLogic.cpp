@@ -23,7 +23,8 @@ ctkDICOMHostMainLogic::ctkDICOMHostMainLogic(ctkHostedAppPlaceholderWidget* plac
   DicomAppWidget(dicomAppWidget),
   PlaceHolderForControls(placeHolderForControls),
   ValidSelection(false),
-  SendData(false)
+  SendData(false),
+  SendResize(false)
 {
   this->Host = new ctkExampleDicomHost(PlaceHolderForHostedApp);
   this->HostControls = new ctkExampleHostControlWidget(Host, PlaceHolderForControls);
@@ -33,7 +34,7 @@ ctkDICOMHostMainLogic::ctkDICOMHostMainLogic(ctkHostedAppPlaceholderWidget* plac
   disconnect(this->Host,SIGNAL(startProgress()),this->Host,SLOT(onStartProgress()));
   connect(this->Host,SIGNAL(appReady()),this,SLOT(onAppReady()), Qt::QueuedConnection);
   connect(this->Host,SIGNAL(startProgress()),this,SLOT(publishSelectedData()), Qt::QueuedConnection);
-  connect(this->PlaceHolderForHostedApp,SIGNAL(resized()),this,SLOT(placeHolderResized()));
+  connect(this->PlaceHolderForHostedApp,SIGNAL(resized()),this,SLOT(placeHolderResized()), Qt::QueuedConnection);
 
   QTreeView * treeview = dicomAppWidget->findChild<QTreeView*>("TreeView");
   QItemSelectionModel* selectionmodel = treeview->selectionModel();
@@ -155,16 +156,44 @@ void ctkDICOMHostMainLogic::publishSelectedData()
     this->Host->getDicomAppService()->bringToFront(rect);
   }
 }
+#define CTK_DAH_LOG_INFO "Thread: " << QThread::currentThreadId() << " Time: " << QTime::currentTime().toString()
+#define CTK_DAH_LOG_LOWLEVEL(msg) qDebug() << CTK_DAH_LOG_INFO msg;
 
 //----------------------------------------------------------------------------
 void ctkDICOMHostMainLogic::placeHolderResized()
 {
   ///the following does not work (yet)
-  //if((this->Host) && (this->Host->getApplicationState() != ctkDicomAppHosting::EXIT))
+  CTK_DAH_LOG_LOWLEVEL ( << "placeHolderResized 1" );
+  if(!SendResize)
+  {
+    SendResize = true;
+    CTK_DAH_LOG_LOWLEVEL ( << "placeHolderResized 2: schedule sendResized" );
+    QTimer::singleShot(100,this,SLOT(sendResized()));
+  }
+  else
+  {
+    CTK_DAH_LOG_LOWLEVEL ( << "placeHolderResized 2b: skipped sendResized" );
+  }
+  CTK_DAH_LOG_LOWLEVEL ( << "placeHolderResized 3" );
+}
+
+//----------------------------------------------------------------------------
+void ctkDICOMHostMainLogic::sendResized()
+{
+  //if(SendResize)
   //{
-  //  QRect rect (this->PlaceHolderForHostedApp->getAbsolutePosition());
-  //  this->Host->getDicomAppService()->bringToFront(rect);
+  //  CTK_DAH_LOG_LOWLEVEL ( << "sendResized: skipping because we are sending already." );
+  //  return;
   //}
+  CTK_DAH_LOG_LOWLEVEL ( << "sendResized 1" );
+  if((this->Host) && (this->Host->getApplicationState() != ctkDicomAppHosting::EXIT))
+  {
+    CTK_DAH_LOG_LOWLEVEL ( << "sendResized 2" );
+    QRect rect (this->PlaceHolderForHostedApp->getAbsolutePosition());
+    this->Host->getDicomAppService()->bringToFront(rect);
+    CTK_DAH_LOG_LOWLEVEL ( << "sendResized 3" );
+  }
+  SendResize = false;
 }
 
 //----------------------------------------------------------------------------

@@ -147,11 +147,12 @@ int main(int argv, char** argc)
   QStringList libFilter;
   libFilter << "*.dll" << "*.so" << "*.dylib";
   QDirIterator dirIter(pluginPath, libFilter, QDir::Files);
+  QString fileLocation;
   while(dirIter.hasNext())
     {
     try
       {
-      QString fileLocation = dirIter.next();
+      fileLocation = dirIter.next();
       if (fileLocation.contains("org_commontk_dah"))
         {
         QSharedPointer<ctkPlugin> plugin = framework->getPluginContext()->installPlugin(QUrl::fromLocalFile(fileLocation));
@@ -164,7 +165,7 @@ int main(int argv, char** argc)
       }
     catch (const ctkPluginException& e)
       {
-      qCritical() << e.what();
+      qCritical() << e.what() << fileLocation;
       }
     }
 

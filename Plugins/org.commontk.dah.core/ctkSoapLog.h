@@ -22,19 +22,23 @@
 #ifndef CTKSOAPLOG_H
 #define CTKSOAPLOG_H
 
-#define CTK_SOAP_LOG_LOWLEVEL(msg) qDebug() msg;
+#include <QTime>
+
+#define CTK_SOAP_LOG_INFO "Thread: " << QThread::currentThreadId() << " Time: " << QTime::currentTime().toString()
+
+#define CTK_SOAP_LOG_LOWLEVEL(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
 //#define CTK_SOAP_LOG_LOWLEVEL(msg)
 
-#define CTK_SOAP_LOG(msg) qDebug() msg;
+#define CTK_SOAP_LOG(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
 //#define CTK_SOAP_LOG(msg)
 
-#define CTK_SOAP_LOG_HIGHLEVEL(msg) qDebug() msg;
+#define CTK_SOAP_LOG_HIGHLEVEL(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
 //#define CTK_SOAP_LOG_HIGHLEVEL(msg)
 
 //#define CTK_SOAP_LOG_REQUEST(msg) 
-#define CTK_SOAP_LOG_REQUEST(msg) qDebug() msg;
+#define CTK_SOAP_LOG_REQUEST(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
 
-#define CTK_SOAP_LOG_RECEPTION(msg) qDebug() msg;
+#define CTK_SOAP_LOG_RECEPTION(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
 //#define CTK_SOAP_LOG_RECEPTION(msg)
 
 #endif // CTKSOAPLOG_H

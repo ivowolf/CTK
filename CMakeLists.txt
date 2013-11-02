@@ -635,6 +635,16 @@ ctk_plugin_option(org.commontk.dah.examplehost
                   "Build the org.commontk.dah.examplehost plugin." OFF
                   CTK_APP_ctkExampleHost)
 
+if(BUILD_TESTING)
+#  ctk_app_option(ctkTestHost1
+#                 "Build the DICOM example application" OFF
+#                 CTK_ENABLE_DICOMApplicationHosting AND CTK_BUILD_EXAMPLES)
+  ctk_plugin_option(org.commontk.dah.testhost
+                    "Build the org.commontk.dah.testhost plugin." OFF
+                    )
+endif()
+
+
 # Plug-ins related to the EventBus demo application
 ctk_plugin_option(org.commontk.eventbus
                   "Build the org.commontk.eventbus plugin." OFF
