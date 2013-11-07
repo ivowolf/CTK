@@ -44,6 +44,10 @@ protected slots:
   void startProgress();
   void placeHolderResized();
   void aboutToQuit();
+  void stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State);
+  void setStateInProgress();
+  void setStateCanceled();
+  void setStateExit();
 protected:
   ctkExampleDicomHost* Host;
 //  ctkTestHostControlWidget* HostControls;

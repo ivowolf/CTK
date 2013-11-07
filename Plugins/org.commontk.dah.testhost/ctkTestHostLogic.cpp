@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QApplication>
+#include <QHash>
 
 //#include <QModelIndex>
 //#include <QTreeView>
@@ -124,32 +125,51 @@ ctkTestHostLogic::~ctkTestHostLogic()
   delete TestQueue;
 }
 
-void ctkTestHostLogic::aboutToQuit()
-{
-  TestQueue->CheckAndContinue("[quitting]");
-
-  this->Host->exitApplicationBlocking();
-
-  delete this->Host;
-  this->Host = 0;
-}
-
 void ctkTestHostLogic::startTest()
 {
   connect(&this->Host->getAppProcess(),SIGNAL(readyReadStandardOutput()),this,SLOT(outputMessageFromHostedApp()));
   connect(&this->Host->getAppProcess(),SIGNAL(error(QProcess::ProcessError)),SLOT(appProcessError(QProcess::ProcessError)));
   connect(&this->Host->getAppProcess(),SIGNAL(stateChanged(QProcess::ProcessState)),SLOT(appProcessStateChanged(QProcess::ProcessState)));
 
+  connect(this->getHost(),SIGNAL(stateChangedReceived(ctkDicomAppHosting::State)),SLOT(stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State)));
+
   TestQueue->Add("StartApplication", "[starting]","");
   TestQueue->Add("[running]");
+  TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
+  TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
   TestQueue->Add("[startProgress]");
   TestQueue->Add("Publish data", "[publishSelectedData]", SLOT(publishSelectedData()));
+  TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 2000);
+  TestQueue->Add("idle");
+  TestQueue->Add("[appReady]");
+  TestQueue->Add("setState(EXIT)", "exit", SLOT(setStateExit()), 2000);
   TestQueue->Add("Quit", "[quitting]", SLOT(quit()), 5000, qApp);
   TestQueue->Apply();
   this->Host->StartApplication(this->AppFileName);
+
+  //QTimer::singleShot(30000, qApp, SLOT(quit()));
 }
 
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::setStateInProgress()
+{
+  bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::setStateCanceled()
+{
+  bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::CANCELED);
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::setStateExit()
+{
+  bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::EXIT);
+}
+
+//----------------------------------------------------------------------------
 void ctkTestHostLogic::sendData(ctkDicomAppHosting::AvailableData& data, bool lastData)
 {
  if ((this->Host))// && (this->HostControls->validAppFileName()) /*&& (ValidSelection)*/)
@@ -175,10 +195,24 @@ void ctkTestHostLogic::sendData(ctkDicomAppHosting::AvailableData& data, bool la
   }
 }
 
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State newState)
+{
+  QHash<ctkDicomAppHosting::State, QString> hash;
+  hash[ctkDicomAppHosting::IDLE]="idle";
+  hash[ctkDicomAppHosting::INPROGRESS]="inprogress";
+  hash[ctkDicomAppHosting::COMPLETED]="completed";
+  hash[ctkDicomAppHosting::SUSPENDED]="suspended";
+  hash[ctkDicomAppHosting::CANCELED]="canceled";
+  hash[ctkDicomAppHosting::EXIT]="exit";
+
+  TestQueue->CheckAndContinue(hash.value(newState,"[unkown]"));
+}
+
+//----------------------------------------------------------------------------
 void ctkTestHostLogic::onAppReady()
 {
   TestQueue->CheckAndContinue("[appReady]");
-  this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
 //  emit SelectionValid(ValidSelection);
   //if(SendData)
   //{
@@ -214,6 +248,18 @@ void ctkTestHostLogic::publishSelectedData()
     this->Host->getDicomAppService()->bringToFront(rect);
   }
 }
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::aboutToQuit()
+{
+  TestQueue->CheckAndContinue("[quitting]");
+
+  this->Host->exitApplicationBlocking();
+
+  delete this->Host;
+  this->Host = 0;
+}
+
 
 //----------------------------------------------------------------------------
 void ctkTestHostLogic::placeHolderResized()
