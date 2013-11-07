@@ -1,8 +1,10 @@
-#ifndef CTKDICOMHOSTMAINLOGIC_H
-#define CTKDICOMHOSTMAINLOGIC_H
+#ifndef CTKTESTHOSTLOGIC_H
+#define CTKTESTHOSTLOGIC_H
 
 #include <QObject>
 #include <QStringList>
+#include <QProcess>
+#include <QQueue>
 
 #include "ctkDicomAppHostingTypes.h"
 
@@ -14,6 +16,8 @@ class QModelIndex;
 class QItemSelection;
 
 class ctkExampleDicomHost;
+
+class TestQueueManager;
 
 class org_commontk_dah_testhost_EXPORT ctkTestHostLogic :
   public QObject
@@ -28,9 +32,16 @@ public:
 public slots:
   void startTest();
   void sendData(ctkDicomAppHosting::AvailableData& data, bool lastData);
+
+  void appProcessError(QProcess::ProcessError error);
+  void appProcessStateChanged(QProcess::ProcessState state);
+
+  void outputMessageFromHostedApp();
+
 protected slots:
   void publishSelectedData();
   void onAppReady();
+  void startProgress();
   void placeHolderResized();
   void aboutToQuit();
 protected:
@@ -43,6 +54,8 @@ protected:
   //bool ValidSelection;
   bool LastData;
   bool SendData;
+
+  TestQueueManager* TestQueue;
 };
 
 #endif
