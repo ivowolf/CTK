@@ -46,6 +46,7 @@ protected slots:
   void aboutToQuit();
   void stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State);
   void setStateInProgress();
+  void setStateSuspended();
   void setStateCanceled();
   void setStateExit();
 protected:

@@ -137,12 +137,25 @@ void ctkTestHostLogic::startTest()
   TestQueue->Add("[running]");
   TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
+
   TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
   TestQueue->Add("[startProgress]");
   TestQueue->Add("Publish data", "[publishSelectedData]", SLOT(publishSelectedData()));
+
   TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 2000);
   TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
+
+  TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
+  TestQueue->Add("[startProgress]");
+
+  TestQueue->Add("setState(SUSPENDED)", "suspended", SLOT(setStateSuspended()), 200);
+  TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
+
+  TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 2000);
+  TestQueue->Add("idle");
+  TestQueue->Add("[appReady]");
+
   TestQueue->Add("setState(EXIT)", "exit", SLOT(setStateExit()), 2000);
   TestQueue->Add("Quit", "[quitting]", SLOT(quit()), 5000, qApp);
   TestQueue->Apply();
@@ -155,6 +168,12 @@ void ctkTestHostLogic::startTest()
 void ctkTestHostLogic::setStateInProgress()
 {
   bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::setStateSuspended()
+{
+  bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::SUSPENDED);
 }
 
 //----------------------------------------------------------------------------
