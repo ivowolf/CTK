@@ -133,7 +133,7 @@ void ctkTestHostLogic::startTest()
 
   connect(this->getHost(),SIGNAL(stateChangedReceived(ctkDicomAppHosting::State)),SLOT(stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State)));
 
-  TestQueue->Add("StartApplication", "[starting]","");
+  TestQueue->Add("StartApplication", "[starting]",SLOT(startHostedApp()));
   TestQueue->Add("[running]");
   TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
@@ -157,11 +157,26 @@ void ctkTestHostLogic::startTest()
   TestQueue->Add("[appReady]");
 
   TestQueue->Add("setState(EXIT)", "exit", SLOT(setStateExit()), 2000);
-  TestQueue->Add("Quit", "[quitting]", SLOT(quit()), 5000, qApp);
-  TestQueue->Apply();
-  this->Host->StartApplication(this->AppFileName);
+  TestQueue->Add("[not running] last exit code 0");
 
+  TestQueue->Add("StartApplication", "[starting]",SLOT(startHostedApp()));
+  TestQueue->Add("[running]");
+  TestQueue->Add("idle");
+  TestQueue->Add("[appReady]");
+
+  TestQueue->Add("setState(EXIT)", "exit", SLOT(setStateExit()), 2000);
+  TestQueue->Add("[not running] last exit code 0");
+
+  TestQueue->Add("Quit", "[quitting]", SLOT(quit()), 5000, qApp);
+
+  TestQueue->Apply();
   //QTimer::singleShot(30000, qApp, SLOT(quit()));
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::startHostedApp()
+{
+  this->Host->StartApplication(this->AppFileName);
 }
 
 //----------------------------------------------------------------------------
