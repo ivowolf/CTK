@@ -15,7 +15,7 @@
 #include "ctkExampleDicomHost.h"
 #include "ctkDicomAvailableDataHelper.h"
 
-#define LOG qDebug() << QString("[@").append(QTime::currentTime().toString()).append("]")
+#define LOG qDebug() << QString("[@").append(QTime::currentTime().toString()).append("]").toStdString().c_str()
 
 class TestQueueData
 {
@@ -34,7 +34,7 @@ public:
   {
     LOG << "[Test: " << Title << "]"; 
     if(Slotname.isEmpty()==false)
-      QTimer::singleShot(0, Receiver, Slotname.toAscii());
+      QTimer::singleShot(TimerMsec, Receiver, Slotname.toAscii());
   }
   bool Check(QString result)
   {
@@ -81,18 +81,18 @@ public:
       TestQueue.head().Apply();
     }
   }
-  bool CheckAndContinue(QString result)
+  bool CheckAndContinue(QString result, QString optionalResultParam="")
   {
     if(TestQueue.isEmpty())
       return false;
-    bool res = TestQueue.head().Check(result); 
+    bool res = TestQueue.head().Check(result.append(optionalResultParam)); 
     TestQueue.dequeue();
     Apply();
     return res;
   }
 };
 
-ctkTestHostLogic::ctkTestHostLogic(QString appFileName, 
+ctkTestHostLogic::ctkTestHostLogic(QString appFileName, QString aDICOMTestDataPath,
                                    ctkHostedAppPlaceholderWidget* placeHolder, 
                                    QWidget* placeHolderForControls, 
                                    int hostPort, int appPort) : 
@@ -102,7 +102,8 @@ ctkTestHostLogic::ctkTestHostLogic(QString appFileName,
   PlaceHolderForControls(placeHolderForControls),
 //  ValidSelection(false),
   LastData(false),
-  SendData(false)
+  SendData(false),
+  DICOMTestDataPath(aDICOMTestDataPath)
 {
   this->TestQueue = new TestQueueManager(this);
 
@@ -133,6 +134,9 @@ void ctkTestHostLogic::startTest()
 
   connect(this->getHost(),SIGNAL(stateChangedReceived(ctkDicomAppHosting::State)),SLOT(stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State)));
 
+  //connect(&this->getHost()->Serthis->Server, SIGNAL(incomingSoapMessage(QtSoapMessage,QtSoapMessage*)),
+  //        this, SLOT(incomingSoapMessage(QtSoapMessage,QtSoapMessage*)));
+
   TestQueue->Add("StartApplication", "[starting]",SLOT(startHostedApp()));
   TestQueue->Add("[running]");
   TestQueue->Add("idle");
@@ -140,7 +144,14 @@ void ctkTestHostLogic::startTest()
 
   TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
   TestQueue->Add("[startProgress]");
-  TestQueue->Add("Publish data", "[publishSelectedData]", SLOT(publishSelectedData()));
+
+  TestQueue->Add("Publish data", "[prepareAvailableData] [start]", SLOT(prepareAvailableData()));
+  TestQueue->Add("[prepareAvailableData] [end]");
+  TestQueue->Add("[publishData] [start]", SLOT(publishData()));
+  TestQueue->Add("[publishData] publishData/notifyDataAvailable returned: 1");
+
+  TestQueue->Add("Bring to front", "[bringToFront(rect)] [start]", SLOT(bringToFront()));
+  TestQueue->Add("[bringToFront(rect)] [end]");
 
   TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 2000);
   TestQueue->Add("idle");
@@ -148,6 +159,9 @@ void ctkTestHostLogic::startTest()
 
   TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
   TestQueue->Add("[startProgress]");
+
+  TestQueue->Add("Bring to front", "[bringToFront(rect)] [start]", SLOT(bringToFront()));
+  TestQueue->Add("[bringToFront(rect)] [end]");
 
   TestQueue->Add("setState(SUSPENDED)", "suspended", SLOT(setStateSuspended()), 200);
   TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
@@ -204,30 +218,30 @@ void ctkTestHostLogic::setStateExit()
 }
 
 //----------------------------------------------------------------------------
-void ctkTestHostLogic::sendData(ctkDicomAppHosting::AvailableData& data, bool lastData)
-{
- if ((this->Host))// && (this->HostControls->validAppFileName()) /*&& (ValidSelection)*/)
-  {
-    *Data = data;
-    LastData = lastData;
- 
-    SendData = true;
-    if(this->Host->getApplicationState() == ctkDicomAppHosting::EXIT)
-    {
-      this->Host->StartApplication(this->AppFileName);
-      //forward output to textedit
-      connect(&this->Host->getAppProcess(),SIGNAL(readyReadStandardOutput()),this,SLOT(outputMessage()));
-    }
-    if(this->Host->getApplicationState() == ctkDicomAppHosting::IDLE)
-    {
-      bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
-    }
-    if(this->Host->getApplicationState() == ctkDicomAppHosting::INPROGRESS)
-    {
-      publishSelectedData();
-    }
-  }
-}
+//void ctkTestHostLogic::sendData(ctkDicomAppHosting::AvailableData& data, bool lastData)
+//{
+// if ((this->Host))// && (this->HostControls->validAppFileName()) /*&& (ValidSelection)*/)
+//  {
+//    *Data = data;
+//    LastData = lastData;
+// 
+//    SendData = true;
+//    if(this->Host->getApplicationState() == ctkDicomAppHosting::EXIT)
+//    {
+//      this->Host->StartApplication(this->AppFileName);
+//      //forward output to textedit
+//      connect(&this->Host->getAppProcess(),SIGNAL(readyReadStandardOutput()),this,SLOT(outputMessage()));
+//    }
+//    if(this->Host->getApplicationState() == ctkDicomAppHosting::IDLE)
+//    {
+//      bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
+//    }
+//    if(this->Host->getApplicationState() == ctkDicomAppHosting::INPROGRESS)
+//    {
+//      publishSelectedData();
+//    }
+//  }
+//}
 
 //----------------------------------------------------------------------------
 void ctkTestHostLogic::stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State newState)
@@ -263,24 +277,54 @@ void ctkTestHostLogic::startProgress()
   TestQueue->CheckAndContinue("[startProgress]");
 }
 
-//----------------------------------------------------------------------------
-void ctkTestHostLogic::publishSelectedData()
-{
-  TestQueue->CheckAndContinue("[publishSelectedData]");
-  if(SendData)
-  {
-    LOG << "send dataDescriptors";
-    bool success = Host->publishData(*Data, LastData);
-    if(!success)
-    {
-      qCritical() << "Failed to publish data";
-    }
-    LOG << "  notifyDataAvailable returned: " << success;
-    SendData=false;
 
-    QRect rect (this->PlaceHolderForHostedApp->getAbsolutePosition());
-    this->Host->getDicomAppService()->bringToFront(rect);
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::prepareAvailableData()
+{
+  TestQueue->CheckAndContinue("[prepareAvailableData] [start]");
+  if(Data == NULL)
+  {
+    LOG << "ctkDicomAppHosting::AvailableData* Data == NULL - cannot prepare AvailableData";
+    return;
   }
+  if(DICOMTestDataPath.isEmpty())
+  {
+    LOG << "DICOMTestDataPath not set - cannot prepare AvailableData";
+    return;
+  }
+
+  QDir dir(DICOMTestDataPath);
+  QStringList files = dir.entryList(QDir::Files);
+  foreach (const QString &filename, files) {
+//    qDebug() << dir.absoluteFilePath(filename);
+    ctkDicomAvailableDataHelper::addToAvailableData(*Data, 
+      Host->objectLocatorCache(), 
+      dir.absoluteFilePath(filename));
+    break; // one is enough for the moment
+  }
+  TestQueue->CheckAndContinue("[prepareAvailableData] [end]");
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::publishData()
+{
+  TestQueue->CheckAndContinue("[publishData] [start]");
+  //if(SendData)
+  //{
+    //TestQueue->CheckAndContinue("publishData");
+    bool success = Host->publishData(*Data, LastData);
+    TestQueue->CheckAndContinue("[publishData] publishData/notifyDataAvailable returned: ",QString::number(success));
+    //SendData=false;
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::bringToFront()
+{
+  QRect rect (this->PlaceHolderForHostedApp->getAbsolutePosition());
+  TestQueue->CheckAndContinue("[bringToFront(rect)] [start]");
+  bool broughtToFront = this->Host->getDicomAppService()->bringToFront(rect);
+  LOG << "[bringToFront(rect)] returned: " << broughtToFront;
+  TestQueue->CheckAndContinue("[bringToFront(rect)] [end]");
 }
 
 //----------------------------------------------------------------------------

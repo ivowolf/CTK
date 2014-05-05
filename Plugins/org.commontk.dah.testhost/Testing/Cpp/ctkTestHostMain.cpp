@@ -137,7 +137,7 @@ int main(int argv, char** argc)
   placeholder->resize(470,110);
   placeholder->show();
 
-  ctkTestHostLogic *logic = new ctkTestHostLogic("D:/Home/ivo/c/CTK/ctkCLMHostedAppCmdExec.bat",placeholder);
+  ctkTestHostLogic *logic = new ctkTestHostLogic("D:/Home/ivo/c/CTK/ctkCLMHostedAppCmdExec.bat", app.arguments().at(1), placeholder);
 
   QTimer::singleShot(0, logic, SLOT(startTest()));
 

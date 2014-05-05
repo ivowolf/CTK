@@ -24,14 +24,14 @@ class org_commontk_dah_testhost_EXPORT ctkTestHostLogic :
 {
   Q_OBJECT
 public:
-  ctkTestHostLogic(QString appFileName, 
+  ctkTestHostLogic(QString appFileName, QString aDICOMTestDataPath="",
     ctkHostedAppPlaceholderWidget* = NULL, QWidget* placeHolderForControls = NULL, int hostPort = 8080, int appPort = 8081);
   virtual ~ctkTestHostLogic();
   ctkExampleDicomHost* getHost();
 //  ctkTestHostControlWidget* getHostControls();
 public slots:
   void startTest();
-  void sendData(ctkDicomAppHosting::AvailableData& data, bool lastData);
+  //void sendData(ctkDicomAppHosting::AvailableData& data, bool lastData);
 
   void appProcessError(QProcess::ProcessError error);
   void appProcessStateChanged(QProcess::ProcessState state);
@@ -39,7 +39,9 @@ public slots:
   void outputMessageFromHostedApp();
 
 protected slots:
-  void publishSelectedData();
+  void prepareAvailableData();
+  void publishData();
+  void bringToFront();
   void onAppReady();
   void startProgress();
   void placeHolderResized();
@@ -61,6 +63,7 @@ protected:
   //bool ValidSelection;
   bool LastData;
   bool SendData;
+  QString DICOMTestDataPath;
 
   TestQueueManager* TestQueue;
 };
