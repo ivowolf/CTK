@@ -80,16 +80,22 @@ ctkCommandLineModuleAppLogic::~ctkCommandLineModuleAppLogic()
     qDebug() << plugins.at(i)->getSymbolicName ();
   }
 }
-
+#include <QTime>
 //----------------------------------------------------------------------------
 bool ctkCommandLineModuleAppLogic::bringToFront(const QRect& requestedScreenArea)
 {
+  qDebug() << "bringToFront - Thread ID:" << QThread::currentThreadId() << " " << QTime::currentTime().toString();
   if(this->AppWidget!=NULL)
   {
-    this->AppWidget->move(requestedScreenArea.topLeft());
-    this->AppWidget->resize(requestedScreenArea.size());
-    this->AppWidget->activateWindow();
-    this->AppWidget->raise();
+    qDebug() << QTime::currentTime().toString() << "bringToFront 1";
+    //this->AppWidget->move(requestedScreenArea.topLeft());
+    //qDebug() << QTime::currentTime().toString() << "bringToFront 2";
+    //this->AppWidget->resize(requestedScreenArea.size());
+    //qDebug() << QTime::currentTime().toString() << "bringToFront 3";
+    //this->AppWidget->activateWindow();
+    //qDebug() << QTime::currentTime().toString() << "bringToFront 4";
+    //this->AppWidget->raise();
+    qDebug() << QTime::currentTime().toString() << "bringToFront 5";
   }
   return true;
 }
@@ -136,6 +142,7 @@ void ctkCommandLineModuleAppLogic::do_something()
 //----------------------------------------------------------------------------
 void ctkCommandLineModuleAppLogic::onStartProgress()
 {
+  qDebug() << "onStartProgress - Thread ID:" << QThread::currentThreadId();
   setInternalState(ctkDicomAppHosting::INPROGRESS);
 
   // we need to create the button before we receive data from

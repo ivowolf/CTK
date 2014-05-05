@@ -30,6 +30,7 @@ protected slots:
   void placeHolderResized();
   void onDataAvailable();
   void aboutToQuit();
+  void sendResized();
 signals:
   void TreeSelectionChanged(const QString &);
   void SelectionValid(bool);
@@ -44,6 +45,7 @@ protected:
   bool ValidSelection;
   QStringList SelectedFiles;
   bool SendData;
+  bool SendResize;
 };
 
 #endif

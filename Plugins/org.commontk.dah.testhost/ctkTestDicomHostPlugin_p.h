@@ -19,26 +19,37 @@
 
 =============================================================================*/
 
-#ifndef CTKSOAPLOG_H
-#define CTKSOAPLOG_H
 
-#include <QTime>
+#ifndef CTKTESTDICOMHOSTPLUGIN_P_H
+#define CTKTESTDICOMHOSTPLUGIN_P_H
 
-#define CTK_SOAP_LOG_INFO "Thread: " << QThread::currentThreadId() << " Time: " << QTime::currentTime().toString()
+#include <ctkPluginActivator.h>
 
-#define CTK_SOAP_LOG_LOWLEVEL(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
-//#define CTK_SOAP_LOG_LOWLEVEL(msg)
+class ctkTestDicomHostPlugin :
+  public QObject, public ctkPluginActivator
+{
+  Q_OBJECT
+  Q_INTERFACES(ctkPluginActivator)
 
-#define CTK_SOAP_LOG(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
-//#define CTK_SOAP_LOG(msg)
+public:
 
-#define CTK_SOAP_LOG_HIGHLEVEL(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
-//#define CTK_SOAP_LOG_HIGHLEVEL(msg)
+  ctkTestDicomHostPlugin();
+  virtual ~ctkTestDicomHostPlugin();
 
-//#define CTK_SOAP_LOG_REQUEST(msg) 
-#define CTK_SOAP_LOG_REQUEST(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
+  virtual void start(ctkPluginContext* context);
+  virtual void stop(ctkPluginContext* context);
 
-#define CTK_SOAP_LOG_RECEPTION(msg) qDebug() << CTK_SOAP_LOG_INFO msg;
-//#define CTK_SOAP_LOG_RECEPTION(msg)
+  static ctkTestDicomHostPlugin* getInstance();
 
-#endif // CTKSOAPLOG_H
+  ctkPluginContext* getPluginContext() const;
+
+
+private:
+
+  static ctkTestDicomHostPlugin* Instance;
+  ctkPluginContext* Context;
+
+
+}; // ctkTestDicomHostPlugin
+
+#endif // CTKTESTDICOMHOSTPLUGIN_P_H
