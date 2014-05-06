@@ -45,8 +45,11 @@ class TestQueueManager
   QQueue<TestQueueData> TestQueue;
   QObject* Receiver;
   QString CurrentTestTitel;
+  bool AbortWhenFailed;
+  bool HasFailed;
 public:
-  TestQueueManager(QObject* receiver) : Receiver(receiver), CurrentTestTitel("TestQueueManager Main")
+  TestQueueManager(QObject* receiver, bool abortWhenFailed=true) 
+    : Receiver(receiver), CurrentTestTitel("TestQueueManager Main"), AbortWhenFailed(abortWhenFailed), HasFailed(false)
   {
   }
   void Add(QString title, QString expectedResult, QString slotname, int timerMsec=0, QObject* receiver=NULL)
@@ -74,10 +77,19 @@ public:
   {
     if(TestQueue.isEmpty())
       return false;
-    bool res = TestQueue.head().Check(result.append(optionalResultParam)); 
+    bool res = TestQueue.head().Check(result.append(optionalResultParam));
+    HasFailed |= !res;
+    if(HasFailed && AbortWhenFailed)
+    {
+      throw std::logic_error( "Test failed." );
+    }
     TestQueue.dequeue();
     Apply();
     return res;
+  }
+  bool Failed() const
+  {
+    return HasFailed;
   }
 };
 #endif

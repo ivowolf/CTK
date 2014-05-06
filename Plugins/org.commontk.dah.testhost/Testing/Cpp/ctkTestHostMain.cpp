@@ -133,6 +133,15 @@ int main(int argv, char** argc)
   ctkTestHostLogic *logic = new ctkTestHostLogic(hostedappdir.absoluteFilePath(hostedapplist.at(0)), (app.arguments().size()>1?app.arguments().at(1):QString(CTKDATA_DIR).append("Data/DICOM/MRHEAD/")), placeholder);
 
   QTimer::singleShot(0, logic, SLOT(startTest()));
-
-  return app.exec();
+  
+  int res;
+  try 
+    {
+    res = app.exec();
+    }
+  catch(...)
+    {
+    res = EXIT_FAILURE;
+    }
+  return res;
 }

@@ -65,7 +65,7 @@ void ctkTestHostLogic::startTest()
   TestQueue->Add("Bring to front", "[bringToFront(rect)] [start]", SLOT(bringToFront()));
   TestQueue->Add("[bringToFront(rect)] [end]");
 
-  TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 4000);
+  TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 500);
   TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
 

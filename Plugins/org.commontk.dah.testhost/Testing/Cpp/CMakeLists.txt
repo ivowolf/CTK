@@ -70,3 +70,4 @@ ctkMacroBuildApp(
 # # Add Tests
 # #
 # SIMPLE_TEST(ctkTestHost1)
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
