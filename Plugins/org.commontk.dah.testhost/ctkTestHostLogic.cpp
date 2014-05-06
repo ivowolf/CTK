@@ -4,14 +4,8 @@
 #include <QApplication>
 #include <QHash>
 
-//#include <QModelIndex>
-//#include <QTreeView>
-//#include <QItemSelectionModel>
-
 // ctk includes
 #include "ctkTestHostLogic.h"
-//#include "ctkHostedAppPlaceholderWidget.h"
-//#include "ctkExampleHostControlWidget.h"
 #include "ctkExampleDicomHost.h"
 #include "ctkDicomAvailableDataHelper.h"
 
@@ -100,15 +94,11 @@ ctkTestHostLogic::ctkTestHostLogic(QString appFileName, QString aDICOMTestDataPa
   QObject(placeHolder), 
   PlaceHolderForHostedApp(placeHolder),
   PlaceHolderForControls(placeHolderForControls),
-//  ValidSelection(false),
-  LastData(false),
-  SendData(false),
   DICOMTestDataPath(aDICOMTestDataPath)
 {
   this->TestQueue = new TestQueueManager(this);
 
   this->Host = new ctkExampleDicomHost(PlaceHolderForHostedApp, hostPort, appPort);
-  //this->HostControls = new ctkExampleHostControlWidget(Host, PlaceHolderForControls);
 
   Data = new ctkDicomAppHosting::AvailableData;
 
@@ -134,9 +124,6 @@ void ctkTestHostLogic::startTest()
 
   connect(this->getHost(),SIGNAL(stateChangedReceived(ctkDicomAppHosting::State)),SLOT(stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State)));
   connect(this->getHost(), SIGNAL(dataAvailable()), SLOT(onDataAvailable()));
-
-  //connect(&this->getHost()->Serthis->Server, SIGNAL(incomingSoapMessage(QtSoapMessage,QtSoapMessage*)),
-  //        this, SLOT(incomingSoapMessage(QtSoapMessage,QtSoapMessage*)));
 
   TestQueue->Add("StartApplication", "[starting]",SLOT(startHostedApp()));
   TestQueue->Add("[running]");
@@ -222,32 +209,6 @@ void ctkTestHostLogic::setStateExit()
 }
 
 //----------------------------------------------------------------------------
-//void ctkTestHostLogic::sendData(ctkDicomAppHosting::AvailableData& data, bool lastData)
-//{
-// if ((this->Host))// && (this->HostControls->validAppFileName()) /*&& (ValidSelection)*/)
-//  {
-//    *Data = data;
-//    LastData = lastData;
-// 
-//    SendData = true;
-//    if(this->Host->getApplicationState() == ctkDicomAppHosting::EXIT)
-//    {
-//      this->Host->StartApplication(this->AppFileName);
-//      //forward output to textedit
-//      connect(&this->Host->getAppProcess(),SIGNAL(readyReadStandardOutput()),this,SLOT(outputMessage()));
-//    }
-//    if(this->Host->getApplicationState() == ctkDicomAppHosting::IDLE)
-//    {
-//      bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
-//    }
-//    if(this->Host->getApplicationState() == ctkDicomAppHosting::INPROGRESS)
-//    {
-//      publishSelectedData();
-//    }
-//  }
-//}
-
-//----------------------------------------------------------------------------
 void ctkTestHostLogic::stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State newState)
 {
   QHash<ctkDicomAppHosting::State, QString> hash;
@@ -265,16 +226,8 @@ void ctkTestHostLogic::stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::S
 void ctkTestHostLogic::onAppReady()
 {
   TestQueue->CheckAndContinue("[appReady]");
-//  emit SelectionValid(ValidSelection);
-  //if(SendData)
-  //{
-  //  bool reply = this->Host->getDicomAppService()->setState(ctkDicomAppHosting::INPROGRESS);
-  //  LOG << "  setState(INPROGRESS) returned: " << reply;
-
-  //  QRect rect (this->PlaceHolderForHostedApp->getAbsolutePosition());
-  //  this->Host->getDicomAppService()->bringToFront(rect);
-  //}
 }
+
 //----------------------------------------------------------------------------
 void ctkTestHostLogic::startProgress()
 {
@@ -300,7 +253,6 @@ void ctkTestHostLogic::prepareAvailableData()
   QDir dir(DICOMTestDataPath);
   QStringList files = dir.entryList(QDir::Files);
   foreach (const QString &filename, files) {
-//    qDebug() << dir.absoluteFilePath(filename);
     ctkDicomAvailableDataHelper::addToAvailableData(*Data, 
       Host->objectLocatorCache(), 
       dir.absoluteFilePath(filename));
@@ -313,12 +265,8 @@ void ctkTestHostLogic::prepareAvailableData()
 void ctkTestHostLogic::publishData()
 {
   TestQueue->CheckAndContinue("[publishData] [start]");
-  //if(SendData)
-  //{
-    //TestQueue->CheckAndContinue("publishData");
-    bool success = Host->publishData(*Data, LastData);
-    TestQueue->CheckAndContinue("[publishData] publishData/notifyDataAvailable returned: ",QString::number(success));
-    //SendData=false;
+  bool success = Host->publishData(*Data, true);
+  TestQueue->CheckAndContinue("[publishData] publishData/notifyDataAvailable returned: ",QString::number(success));
 }
 
 //----------------------------------------------------------------------------
@@ -365,12 +313,6 @@ ctkExampleDicomHost* ctkTestHostLogic::getHost()
 {
   return this->Host;
 }
-
-//----------------------------------------------------------------------------
-//ctkExampleHostControlWidget* ctkTestHostLogic::getHostControls()
-//{
-//  return this->HostControls;
-//}
 
 //----------------------------------------------------------------------------
 void ctkTestHostLogic::outputMessageFromHostedApp()

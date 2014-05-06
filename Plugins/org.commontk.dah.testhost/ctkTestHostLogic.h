@@ -28,10 +28,8 @@ public:
     ctkHostedAppPlaceholderWidget* = NULL, QWidget* placeHolderForControls = NULL, int hostPort = 8080, int appPort = 8081);
   virtual ~ctkTestHostLogic();
   ctkExampleDicomHost* getHost();
-//  ctkTestHostControlWidget* getHostControls();
 public slots:
   void startTest();
-  //void sendData(ctkDicomAppHosting::AvailableData& data, bool lastData);
 
   void appProcessError(QProcess::ProcessError error);
   void appProcessStateChanged(QProcess::ProcessState state);
@@ -56,14 +54,10 @@ protected slots:
   void setStateExit();
 protected:
   ctkExampleDicomHost* Host;
-//  ctkTestHostControlWidget* HostControls;
   ctkHostedAppPlaceholderWidget* PlaceHolderForHostedApp;
   QWidget* PlaceHolderForControls;
   QString AppFileName;
   ctkDicomAppHosting::AvailableData* Data;
-  //bool ValidSelection;
-  bool LastData;
-  bool SendData;
   QString DICOMTestDataPath;
 
   TestQueueManager* TestQueue;

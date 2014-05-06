@@ -40,9 +40,6 @@
 #include <ctkPluginContext.h>
 
 // CTK includes
-//#include <ctkExampleDicomHost.h>
-//#include <ctkHostAppExampleWidget.h>
-//#include <ui_ctkExampleHostMainWindow.h>
 #include <ctkHostedAppPlaceholderWidget.h>
 #include <ctkTestHostLogic.h>
 
@@ -119,22 +116,6 @@ int main(int argv, char** argc)
     {
     plugin->start();
     }
-
-////  QMainWindow mainWindow;
-////  Ui::MainWindow ui;
-////  ui.setupUi(&mainWindow);
-////  if ( QApplication::argc() > 1 )
-////    {
-////    ui.controlWidget->setAppFileName(QApplication::argv()[1]);
-////    }
-////
-//////  mainWindow.addDockWidget(static_cast<Qt::DockWidgetArea>(4),new ctkHostAppExampleWidget());
-////
-//////  QVBoxLayout* layout = new QVBoxLayout(&mainWindow);
-////
-////
-//////  layout->addWidget(placeholder);
-////  mainWindow.show();
 
   ctkHostedAppPlaceholderWidget* placeholder = new ctkHostedAppPlaceholderWidget(NULL);
   placeholder->move(8,15);
