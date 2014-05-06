@@ -133,6 +133,7 @@ void ctkTestHostLogic::startTest()
   connect(&this->Host->getAppProcess(),SIGNAL(stateChanged(QProcess::ProcessState)),SLOT(appProcessStateChanged(QProcess::ProcessState)));
 
   connect(this->getHost(),SIGNAL(stateChangedReceived(ctkDicomAppHosting::State)),SLOT(stateChangedReceivedViaAbstractHost(ctkDicomAppHosting::State)));
+  connect(this->getHost(), SIGNAL(dataAvailable()), SLOT(onDataAvailable()));
 
   //connect(&this->getHost()->Serthis->Server, SIGNAL(incomingSoapMessage(QtSoapMessage,QtSoapMessage*)),
   //        this, SLOT(incomingSoapMessage(QtSoapMessage,QtSoapMessage*)));
@@ -149,6 +150,8 @@ void ctkTestHostLogic::startTest()
   TestQueue->Add("[prepareAvailableData] [end]");
   TestQueue->Add("[publishData] [start]", SLOT(publishData()));
   TestQueue->Add("[publishData] publishData/notifyDataAvailable returned: 1");
+
+  TestQueue->Add("Let app process data", "[dataAvailable]", "");
 
   TestQueue->Add("Bring to front", "[bringToFront(rect)] [start]", SLOT(bringToFront()));
   TestQueue->Add("[bringToFront(rect)] [end]");
@@ -316,6 +319,12 @@ void ctkTestHostLogic::publishData()
     bool success = Host->publishData(*Data, LastData);
     TestQueue->CheckAndContinue("[publishData] publishData/notifyDataAvailable returned: ",QString::number(success));
     //SendData=false;
+}
+
+//----------------------------------------------------------------------------
+void ctkTestHostLogic::onDataAvailable()
+{
+  TestQueue->CheckAndContinue("[dataAvailable]");
 }
 
 //----------------------------------------------------------------------------
