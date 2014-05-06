@@ -56,6 +56,7 @@ int main(int argv, char** argc)
   parser.addArgument("hostURL", "", QVariant::String, "Hosting system URL");
   parser.addArgument("applicationURL", "", QVariant::String, "Hosted Application URL");
   parser.addArgument("plugin", "", QVariant::String, "Plugin implementing the DicomAppInterface", "org_commontk_dah_exampleapp");
+  parser.addArgument("testid", "", QVariant::Int, "Test ID (run in test mode if provided)", 0);
   parser.addArgument("help", "h", QVariant::Bool, "Show this help text");
 
   bool ok = false;
@@ -83,14 +84,14 @@ int main(int argv, char** argc)
 
   if (parsedArgs.contains("applicationURL") == false)
     {
-    qCritical() << "Missing parameter hostURL.";
+    qCritical() << "Missing parameter applicationURL.";
     QTextStream(stdout, QIODevice::WriteOnly) << parser.helpText();
     return EXIT_FAILURE;
     }
 
   QString hostURL = parsedArgs.value("hostURL").toString();
   QString appURL = parsedArgs.value("applicationURL").toString();
-  qDebug() << "appURL is: " << appURL << " . Extracted port is: " << QUrl(appURL).port();
+  qDebug() << "appURL is: " << appURL << ". Extracted port is: " << QUrl(appURL).port();
 
   // Get the name of the plugin with the business logic
   // (thus the actual logic of the hosted app)
@@ -98,7 +99,12 @@ int main(int argv, char** argc)
   qCritical() << "  Plugin name: " << pluginName;
 
   ctkProperties fwProps;
-  // pass further parameters the plugins
+  // pass further parameters to the plugins
+  if (parsedArgs.contains("testid") == true)
+    {
+    fwProps.insert("dah.testid", parsedArgs.value("testid").toInt());
+    qDebug() << "Testid:" << parsedArgs.value("testid").toInt();
+    }
   if(parser.unparsedArguments().count() > 0)
     {
     QString args = parser.unparsedArguments().join(" ");

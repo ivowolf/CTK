@@ -79,6 +79,9 @@ protected Q_SLOTS:
 private:
   QWidget * AppWidget;
   Ui::ctkExampleDicomAppWidget ui;
+
+  // TestID: run test with this ID if > 0
+  int TestID;
 }; // ctkExampleDicomAppLogic
 
 #endif // ctkExampleDicomAppLogic_P_H

@@ -153,7 +153,7 @@ void ctkTestHostLogic::startTest()
   TestQueue->Add("Bring to front", "[bringToFront(rect)] [start]", SLOT(bringToFront()));
   TestQueue->Add("[bringToFront(rect)] [end]");
 
-  TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 2000);
+  TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 4000);
   TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
 
@@ -190,7 +190,8 @@ void ctkTestHostLogic::startTest()
 //----------------------------------------------------------------------------
 void ctkTestHostLogic::startHostedApp()
 {
-  this->Host->StartApplication(this->AppFileName);
+
+  this->Host->StartApplication(this->AppFileName,QString("--testid 1").split(" "));
 }
 
 //----------------------------------------------------------------------------

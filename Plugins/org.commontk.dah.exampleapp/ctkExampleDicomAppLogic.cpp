@@ -43,7 +43,7 @@
 
 //----------------------------------------------------------------------------
 ctkExampleDicomAppLogic::ctkExampleDicomAppLogic():
-ctkDicomAbstractApp(ctkExampleDicomAppPlugin::getPluginContext()), AppWidget(0)
+ctkDicomAbstractApp(ctkExampleDicomAppPlugin::getPluginContext()), AppWidget(0), TestID(0)
 {
 
 
@@ -61,6 +61,13 @@ ctkDicomAbstractApp(ctkExampleDicomAppPlugin::getPluginContext()), AppWidget(0)
   catch(...)
   {
     qDebug() << "ctkDicomAbstractApp: Could not getHostInterface()";
+  }
+
+  QVariant testidvariant = ctkExampleDicomAppPlugin::getPluginContext()->getProperty("dah.testid");
+  qDebug() << "sdfsdfsdf"<<testidvariant;
+  if(testidvariant.isValid())
+  {
+    TestID = testidvariant.toInt();
   }
 }
 
@@ -213,6 +220,11 @@ void ctkExampleDicomAppLogic::onDataAvailable()
   }
   ui.ReceivedDataInformation->setText(s);
   ui.LoadDataButton->setEnabled(true);
+
+  if(TestID==1)
+  {
+    QTimer::singleShot(1000, this, SLOT(onLoadDataClicked()));
+  }
 }
 
 
@@ -276,6 +288,11 @@ void ctkExampleDicomAppLogic::onLoadDataClicked()
     }
   }
   ui.ReceivedDataInformation->setText(s);
+
+  if(TestID==1)
+  {
+    QTimer::singleShot(1000, this, SLOT(onCreateSecondaryCapture()));
+  }
 }
 
 void ctkExampleDicomAppLogic::onCreateSecondaryCapture()
