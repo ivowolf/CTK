@@ -54,13 +54,14 @@ ctkExampleDicomHost::ctkExampleDicomHost(ctkHostedAppPlaceholderWidget* placehol
 }
 
 //----------------------------------------------------------------------------
-void ctkExampleDicomHost::StartApplication(QString AppPath)
+void ctkExampleDicomHost::StartApplication(QString AppPath, QStringList additionalArguments)
 {
   QStringList arguments;
   arguments.append("--hostURL");
   arguments.append(QString("http://localhost:") + QString::number(this->getHostPort()) + "/HostInterface" );
   arguments.append("--applicationURL");
   arguments.append(QString("http://localhost:") + QString::number(this->getAppPort()) + "/ApplicationInterface" );
+  arguments << additionalArguments;
   //by default, the ctkExampleHostedApp uses the org.commontk.dah.exampleapp plugin
   //arguments.append("dicomapp"); // the app plugin to use - has to be changed later
   //if (!QProcess::startDetached (

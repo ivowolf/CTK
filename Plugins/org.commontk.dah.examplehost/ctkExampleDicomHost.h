@@ -42,7 +42,7 @@ public:
   ctkExampleDicomHost(ctkHostedAppPlaceholderWidget* placeholderWidget, int hostPort = 8080, int appPort = 8081);
   virtual ~ctkExampleDicomHost();
 
-  virtual void StartApplication(QString AppPath);
+  virtual void StartApplication(QString AppPath, QStringList additionalArguments=QStringList());
 
   /**
    * Returns a newly created DICOM UID that the Hosted Application might use, e.g., to create new data
