@@ -78,6 +78,13 @@ void ctkTestHostLogic::startTest()
   TestQueue->Add("setState(SUSPENDED)", "suspended", SLOT(setStateSuspended()), 200);
   TestQueue->Add("setState(INPROGRESS)", "inprogress", SLOT(setStateInProgress()), 200);
 
+  TestQueue->Add("Publish data", "[prepareAvailableData] [start]", SLOT(prepareAvailableData()));
+  TestQueue->Add("[prepareAvailableData] [end]");
+  TestQueue->Add("[publishData] [start]", SLOT(publishData()));
+  TestQueue->Add("[publishData] publishData/notifyDataAvailable returned: 1");
+
+  TestQueue->Add("Let app process data", "[dataAvailable]", "");
+
   TestQueue->Add("setState(CANCELED)", "canceled", SLOT(setStateCanceled()), 2000);
   TestQueue->Add("idle");
   TestQueue->Add("[appReady]");
