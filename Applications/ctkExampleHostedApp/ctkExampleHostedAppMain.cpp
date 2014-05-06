@@ -38,14 +38,7 @@
 #include <ctkPluginContext.h>
 
 // For testing purposes use:
-// --hostURL http://localhost:8081/host --applicationURL http://localhost:8082/app dicomapp
-
-//----------------------------------------------------------------------------
-void print_usage()
-{
-  qCritical() << "Usage:";
-  qCritical() << "  " << QFileInfo(qApp->arguments().at(0)).fileName() << " --hostURL url1 --applicationURL url2 <plugin-name>";
-}
+// --hostURL http://localhost:8081/host --applicationURL http://localhost:8082/app
 
 //----------------------------------------------------------------------------
 int main(int argv, char** argc)
@@ -77,7 +70,6 @@ int main(int argv, char** argc)
   // Show a help message
   if (parsedArgs.contains("help"))
     {
-    print_usage();
     QTextStream(stdout, QIODevice::WriteOnly) << parser.helpText();
     return EXIT_SUCCESS;
     }
@@ -85,7 +77,6 @@ int main(int argv, char** argc)
   if (parsedArgs.contains("hostURL") == false)
     {
     qCritical() << "Missing parameter hostURL.";
-    print_usage();
     QTextStream(stdout, QIODevice::WriteOnly) << parser.helpText();
     return EXIT_FAILURE;
     }
@@ -93,7 +84,6 @@ int main(int argv, char** argc)
   if (parsedArgs.contains("applicationURL") == false)
     {
     qCritical() << "Missing parameter hostURL.";
-    print_usage();
     QTextStream(stdout, QIODevice::WriteOnly) << parser.helpText();
     return EXIT_FAILURE;
     }
