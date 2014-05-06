@@ -1,5 +1,10 @@
 PROJECT(ctkTestHost)
 
+configure_file(
+  ctkTestHostMain.h.in
+  ${PROJECT_BINARY_DIR}/ctkTestHostMain.h @ONLY
+  )
+
 #
 # See CTK/CMake/ctkMacroBuildApp.cmake for details
 #
@@ -32,6 +37,7 @@ ctkMacroBuildApp(
   UI_FORMS ${KIT_UI_FORMS}
   TARGET_LIBRARIES ${KIT_target_libraries}
   RESOURCES ${KIT_resources}
+  INCLUDE_DIRECTORIES ${PROJECT_BINARY_DIR}
   )
 
 # SET(KIT ${PROJECT_NAME})

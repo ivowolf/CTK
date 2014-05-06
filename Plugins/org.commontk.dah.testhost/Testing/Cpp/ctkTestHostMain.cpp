@@ -48,6 +48,10 @@
 
 // STD includes
 #include <cstdlib>
+#include <iostream>
+
+// other includes
+#include "ctkTestHostMain.h"
 
 int main(int argv, char** argc)
 {
@@ -136,8 +140,16 @@ int main(int argv, char** argc)
   placeholder->move(8,15);
   placeholder->resize(470,110);
   placeholder->show();
+  
+  QDir hostedappdir(pluginPath);
+  QStringList hostedapplist = hostedappdir.entryList(QStringList("ctkExampleHostedApp*"),QDir::Executable|QDir::Files);
+  if(hostedapplist.isEmpty())
+  {
+    std::cerr << "Could not find hosted app '" << "ctkExampleHostedApp" << "' for testing in directory '" << pluginPath.toStdString() << "'.";
+    return EXIT_FAILURE;
+  }
 
-  ctkTestHostLogic *logic = new ctkTestHostLogic("D:/Home/ivo/c/CTK/ctkCLMHostedAppCmdExec.bat", app.arguments().at(1), placeholder);
+  ctkTestHostLogic *logic = new ctkTestHostLogic(hostedappdir.absoluteFilePath(hostedapplist.at(0)), (app.arguments().size()>1?app.arguments().at(1):QString(CTKDATA_DIR).append("Data/DICOM/MRHEAD/")), placeholder);
 
   QTimer::singleShot(0, logic, SLOT(startTest()));
 

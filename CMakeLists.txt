@@ -573,7 +573,7 @@ ctk_app_option(ctkExampleHost
 
 ctk_app_option(ctkExampleHostedApp
                "Build the DICOM example application" OFF
-               CTK_ENABLE_DICOMApplicationHosting AND CTK_BUILD_EXAMPLES)
+               (CTK_ENABLE_DICOMApplicationHosting AND CTK_BUILD_EXAMPLES) OR CTK_PLUGIN_org.commontk.dah.testhost)
 
 ctk_app_option(ctkEventBusDemo
                "Build the DICOM example application" OFF
@@ -676,14 +676,9 @@ ctk_plugin_option(org.commontk.dah.examplehost
                   "Build the org.commontk.dah.examplehost plugin." OFF
                   CTK_APP_ctkExampleHost)
 
-if(BUILD_TESTING)
-#  ctk_app_option(ctkTestHost1
-#                 "Build the DICOM example application" OFF
-#                 CTK_ENABLE_DICOMApplicationHosting AND CTK_BUILD_EXAMPLES)
-  ctk_plugin_option(org.commontk.dah.testhost
-                    "Build the org.commontk.dah.testhost plugin." OFF
-                    )
-endif()
+ctk_plugin_option(org.commontk.dah.testhost
+                  "Build the org.commontk.dah.testhost plugin." OFF
+                  CTK_ENABLE_DICOMApplicationHosting AND BUILD_TESTING)
 
 
 # Plug-ins related to the EventBus demo application
@@ -702,6 +697,15 @@ if(CTK_USE_CONTRIBUTED_PLUGINS)
                           )
   mark_as_superbuild(PluginsContrib_DIR:PATH)
 endif()
+
+# Save the set of enabled plugins in a cache file
+set(_enabled_plugins) #ivo
+foreach(_plugin ${CTK_PLUGINS})
+  if(CTK_PLUGIN_${_plugin})
+    list(APPEND _enabled_plugins ${_plugin})
+  endif()
+endforeach()
+set(CTK_ENABLED_PLUGINS ${_enabled_plugins} CACHE INTERNAL "" FORCE)
 
 #-----------------------------------------------------------------------------
 # High-Level CTK options
@@ -738,7 +742,7 @@ ctk_enable_option(Python_Wrapping "Wrap CTK classes using Qt meta-object system 
 mark_as_superbuild(CTK_ENABLE_Python_Wrapping)
 
 # Build examples
-# Create the logical expression containing the minium set of required options
+# Create the logical expression containing the minimum set of required options
 # for the CTK_BUILD_EXAMPLES option to be ON
 set(_build_examples_logical_expr)
 foreach(_app ${CTK_ENABLED_APPS})
