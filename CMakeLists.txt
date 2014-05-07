@@ -210,7 +210,6 @@ foreach(file
   CMake/ctkMacroValidateBuildOptions.cmake
   CMake/ctkMacroAddCtkLibraryOptions.cmake
   CMake/ctkFunctionGenerateDGraphInput.cmake
-  CMake/ctkFunctionGenerateProjectXml.cmake
   CMake/ctkFunctionGeneratePluginManifest.cmake
   CMake/ctkMacroGeneratePluginResourceFile.cmake
   CMake/ctkFunctionAddPluginRepo.cmake
@@ -723,7 +722,7 @@ ctk_enable_option(DICOM "Enable default DICOM support" OFF
 # host and/or hosted application. This will not enable any example plugins
 # or executables (enable CTK_ENABLE_EXAMPLES for that).
 ctk_enable_option(DICOMApplicationHosting "Enable DICOM Part 19 Application Hosting support" OFF
-                  CTK_PLUGIN_org.commontk.dah.host AND CTK_PLUGIN_org.commontk.dah.app)
+                  CTK_PLUGIN_org.commontk.dah.host AND CTK_PLUGIN_org.commontk.dah.hostedapp)
 
 # The CTK Qt Widgets. This will enable the Qt Widget library only.
 # It might trigger the enabling of other widget libraries in combination
@@ -889,20 +888,9 @@ set(CTEST_PROJECT_SUBPROJECTS ${CTEST_PROJECT_SUBPROJECTS})
 
 # If the list of subproject is empty, let's at least build CTKCore
 list(LENGTH CTEST_PROJECT_SUBPROJECTS subproject_count)
-IF (subproject_count EQUAL 0)
+if(subproject_count EQUAL 0)
   set(CTEST_PROJECT_SUBPROJECTS CTKCore)
 endif()
-
-# Configure CTestConfigSubProject.cmake that could be used by CTest scripts
-configure_file(${CTK_SOURCE_DIR}/CMake/CTestConfigSubProject.cmake.in
-               ${CTK_BINARY_DIR}/CTestConfigSubProject.cmake)
-
-#-----------------------------------------------------------------------------
-# Project.xml
-#
-
-# Generate Project.xml file expected by the CTest driver script
-ctkFunctionGenerateProjectXml(${CTK_BINARY_DIR} ${PROJECT_NAME} "${target_directories}" ${CTK_SUPERBUILD})
 
 #-----------------------------------------------------------------------------
 # CTK dependencies - Projects should be TOPOLOGICALLY ordered
