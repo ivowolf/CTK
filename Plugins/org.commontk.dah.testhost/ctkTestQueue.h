@@ -4,6 +4,8 @@
 // Qt includes
 #include <QDebug>
 
+#include <stdexcept>
+
 #define LOG qDebug() << QString("[@").append(QTime::currentTime().toString()).append("]").toStdString().c_str()
 
 class TestQueueData
@@ -21,7 +23,7 @@ public:
   }
   void Apply()
   {
-    LOG << "[Test: " << Title << "]"; 
+    LOG << "[Test: " << Title << "]";
     if(Slotname.isEmpty()==false)
       QTimer::singleShot(TimerMsec, Receiver, Slotname.toAscii());
   }
@@ -34,7 +36,7 @@ public:
     }
     else
     {
-      LOG << "[Test: " << Title << "] " << "failed: expected " << ExpectedResult << ", but got " << result; 
+      LOG << "[Test: " << Title << "] " << "failed: expected " << ExpectedResult << ", but got " << result;
       return false;
     }
   }
@@ -48,7 +50,7 @@ class TestQueueManager
   bool AbortWhenFailed;
   bool HasFailed;
 public:
-  TestQueueManager(QObject* receiver, bool abortWhenFailed=true) 
+  TestQueueManager(QObject* receiver, bool abortWhenFailed=true)
     : Receiver(receiver), CurrentTestTitel("TestQueueManager Main"), AbortWhenFailed(abortWhenFailed), HasFailed(false)
   {
   }
