@@ -227,7 +227,6 @@ void ctkExampleDicomAppLogic::onDataAvailable()
   }
 }
 
-
 void ctkExampleDicomAppLogic::onLoadDataClicked()
 {
   const ctkDicomAppHosting::AvailableData& data = getIncomingAvailableData();
@@ -261,10 +260,10 @@ void ctkExampleDicomAppLogic::onLoadDataClicked()
     if(filename.startsWith("file:/",Qt::CaseInsensitive))
       filename=filename.remove(0,8);
     qDebug()<<filename;
-    if(QFileInfo(filename).exists())
+    if(QFileInfo(filename).exists() && (TestID==0))
     {
       try {
-        DicomImage dcmtkImage(filename.toLatin1().data());
+        DicomImage dcmtkImage("/home/ivo/c/binDAH/CTKData/Data/DICOM/MRHEAD/000002.IMA");//filename.toStdString().c_str());
         ctkDICOMImage ctkImage(&dcmtkImage);
 
         QPixmap pixmap = QPixmap::fromImage(ctkImage.frame(0),Qt::AvoidDither);
@@ -291,7 +290,7 @@ void ctkExampleDicomAppLogic::onLoadDataClicked()
 
   if(TestID==1)
   {
-    QTimer::singleShot(1000, this, SLOT(onCreateSecondaryCapture()));
+    QTimer::singleShot(1000, this, SLOT(testSendDataBack()));
   }
 }
 
@@ -339,4 +338,45 @@ void ctkExampleDicomAppLogic::onCreateSecondaryCapture()
       qDebug() << "Creating temporary file failed.";
   }
 
+}
+
+void ctkExampleDicomAppLogic::testSendDataBack()
+{
+    QStringList preferredProtocols;
+    preferredProtocols.append("file:");
+    QString outputlocation = getHostInterface()->getOutputLocation(preferredProtocols);
+    QString templatefilename = QDir(outputlocation).absolutePath();
+    if(templatefilename.isEmpty()==false) templatefilename.append('/');
+    templatefilename.append("ctkdahscXXXXXX.jpg");
+    QTemporaryFile *tempfile = new QTemporaryFile(templatefilename,this->AppWidget);
+
+    if(tempfile->open())
+    {
+      QString filename = QFileInfo(tempfile->fileName()).absoluteFilePath();
+      qDebug() << "Created file: " << filename;
+      tempfile->close();
+//      QPixmap tmppixmap(*pixmap);
+//      QPainter painter(&tmppixmap);
+//      painter.setPen(Qt::white);
+//      painter.setFont(QFont("Arial", 15));
+//      painter.drawText(tmppixmap.rect(),Qt::AlignBottom|Qt::AlignLeft,"Secondary capture by ctkExampleDicomApp");
+//     //painter.drawText(rect(), Qt::AlignCenter, "Qt");
+//      tmppixmap.save(tempfile->fileName(), "JPEG");
+      qDebug() << "Created Uuid: " << getHostInterface()->generateUID();
+
+      ctkDicomAppHosting::AvailableData resultData;
+      ctkDicomAvailableDataHelper::addToAvailableData(resultData,
+        objectLocatorCache(),
+        tempfile->fileName());
+
+      bool success = publishData(resultData, true);
+      if(!success)
+      {
+        qCritical() << "Failed to publish data";
+      }
+      qDebug() << "  publishData returned: " << success;
+
+    }
+    else
+      qDebug() << "Creating temporary file failed.";
 }

@@ -76,6 +76,8 @@ protected Q_SLOTS:
   void onCreateSecondaryCapture();
 
   void onDataAvailable();
+
+  void testSendDataBack();
 private:
   QWidget * AppWidget;
   Ui::ctkExampleDicomAppWidget ui;
