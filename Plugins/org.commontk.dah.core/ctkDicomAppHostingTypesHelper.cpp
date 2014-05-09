@@ -236,10 +236,10 @@ QStringList ctkDicomSoapArrayOfStringType::getArray(const QtSoapType& type)
   QStringList list;
   if(type.type()==QtSoapType::Struct)
   {
-    const QtSoapType& type(type[0]);
-    for (int i = 0; i < type.count() ; i++)
+    const QtSoapType& innertype(type[0]);
+    for (int i = 0; i < innertype.count() ; i++)
     {
-      const QString str = type[i].value().toString();
+      const QString str = innertype[i].value().toString();
       list << str;
     }
   }
